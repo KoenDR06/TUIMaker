@@ -1,10 +1,12 @@
 package me.koendev.tuimaker
 
-import me.koendev.tuimaker.elements.TUIElement
+import me.koendev.tuimaker.elements.Box
 import java.awt.Color
 
 class TUI(val width: Int, val height: Int) {
-    val elements: MutableList<TUIElement> = mutableListOf()
+    var shown = false
+
+    val elements: MutableList<Box> = mutableListOf()
     var eventHandler: (char: Char) -> Unit = { char ->
         when (char) {
             'q' -> throw Exception("Quit application")
@@ -14,12 +16,14 @@ class TUI(val width: Int, val height: Int) {
     var closeHandler: () -> Unit = {}
 
     fun show() {
+        shown = true
         // Prints: Enable alternate buffer; Hide cursor
         print("\u001B[?1049h\u001B[?25l")
         Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "stty raw </dev/tty"))
 
         for (element in elements) {
             element.draw()
+            element.writeContent()
         }
 
         while (true) {
@@ -33,6 +37,7 @@ class TUI(val width: Int, val height: Int) {
                 // Prints: Disable alternate buffer; Show cursor
                 print(resetColor() + "\u001B[?1049l\u001B[?25h")
 
+                shown = false
                 closeHandler()
                 break
             }
@@ -45,10 +50,11 @@ class TUI(val width: Int, val height: Int) {
         fun setBackgroundColor(c: Color) = "\u001B[48;2;${c.red};${c.green};${c.blue};m"
         fun resetColor() = "\u001B[0m"
 
-        fun write(x: Int, y: Int, text: String, color: Color) {
+        fun write(x: Int, y: Int, text: String, foreColor: Color, backColor: Color) {
             val finalText = text.replace("\n", "\u001B[E\u001B[${x-1}C")
             print(
-                setForegroundColor(color) +
+                setForegroundColor(foreColor) +
+                setBackgroundColor(backColor) +
                 moveCursor(x, y) +
                 finalText +
                 resetColor()

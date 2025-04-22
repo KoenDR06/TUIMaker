@@ -2,4 +2,4 @@
 
 ## Examples
 
-Best examples I can give are at [https://github.com/KoenDR06/ComedyTUI](this) repo, which is the project that inspired this project.
+Best examples I can give are at [this](https://github.com/KoenDR06/ComedyTUI) repo, which is the project that inspired this project.

@@ -32,16 +32,23 @@ class TUI(val width: Int, val height: Int) {
 
             try {
                 eventHandler(char)
-            } catch (e: Exception) {
-                Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "stty -raw </dev/tty"))
-                // Prints: Disable alternate buffer; Show cursor
-                print(resetColor() + "\u001B[?1049l\u001B[?25h")
-
-                shown = false
-                closeHandler()
+            } catch (e: CloseException) {
+                close()
                 break
             }
         }
+    }
+
+    fun close() {
+        shown = false
+
+        Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "stty -raw </dev/tty"))
+        // Prints: Disable alternate buffer; Show cursor
+        print(resetColor() + "\u001B[?1049l\u001B[?25h")
+
+        // This shit doesn't work unless it waits for a bit, hella strange
+        Thread.sleep(10)
+        closeHandler()
     }
 
     companion object {
